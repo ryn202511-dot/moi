@@ -41,7 +41,7 @@ rm -rf build/ dist/ *.spec
 echo ""
 echo "[3/3] Building executable..."
 echo "This may take 1-2 minutes..."
-python3 -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
+python3 -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher_advanced.py
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to build executable"

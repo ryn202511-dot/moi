@@ -56,6 +56,12 @@ def generate_password(length=12):
     return password
 
 
+def generate_phone_number(prefix='84'):
+    """Tạo số điện thoại ngẫu nhiên (Việt Nam)"""
+    phone = f"{prefix}{''.join(random.choices(string.digits, k=9))}"
+    return phone
+
+
 def generate_email(domain='example.com'):
     """Tạo email ngẫu nhiên"""
     username = ''.join(random.choices(
@@ -87,6 +93,37 @@ def save_account(username, password, email, filename='accounts.txt'):
     return True
 
 
+def save_account_success(username, password, email, phone='', filename='accounts_success.txt'):
+    """Lưu tài khoản đã đăng ký thành công"""
+    os.makedirs(os.path.dirname(filename) if os.path.dirname(filename) else '.', exist_ok=True)
+    with open(filename, 'a', encoding='utf-8') as f:
+        f.write(f"{username}|{password}|{email}|{phone}\n")
+    return True
+
+
+def load_accounts_from_file(filename):
+    """Tải danh sách account từ file (format: username|password|email|phone)"""
+    accounts = []
+    if not os.path.exists(filename):
+        return accounts
+    
+    with open(filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split('|')
+            if len(parts) >= 3:
+                account = {
+                    'username': parts[0],
+                    'password': parts[1],
+                    'email': parts[2],
+                    'phone': parts[3] if len(parts) > 3 else '',
+                }
+                accounts.append(account)
+    return accounts
+
+
 class AccountData:
     """Lớp để lưu trữ dữ liệu tài khoản"""
     def __init__(self):
@@ -115,3 +152,38 @@ class AccountData:
             'first_name': self.first_name,
             'last_name': self.last_name,
         }
+
+def load_phone_numbers(filename):
+    """Tải danh sách số điện thoại từ file"""
+    phones = []
+    if not os.path.exists(filename):
+        return phones
+    
+    with open(filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                phones.append(line)
+    return phones
+
+
+def save_successful_account(username, password, email, phone='', bank='', url='', 
+                            filename='ACC_OK.txt'):
+    """Lưu tài khoản đăng ký thành công"""
+    os.makedirs(os.path.dirname(filename) if os.path.dirname(filename) else '.', 
+                exist_ok=True)
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(filename, 'a', encoding='utf-8') as f:
+        f.write(f"{timestamp}|{username}|{password}|{email}|{phone}|{bank}|{url}\n")
+    return True
+
+
+def save_failed_account(username, password, email, phone='', bank='', url='', 
+                       error_msg='', filename='FAIL.txt'):
+    """Lưu tài khoản đăng ký không thành công"""
+    os.makedirs(os.path.dirname(filename) if os.path.dirname(filename) else '.', 
+                exist_ok=True)
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(filename, 'a', encoding='utf-8') as f:
+        f.write(f"{timestamp}|{username}|{password}|{email}|{phone}|{bank}|{url}|{error_msg}\n")
+    return True

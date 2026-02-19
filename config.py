@@ -22,6 +22,20 @@ GAME_SERVERS = {
     }
 }
 
+# Bank list for registration
+BANK_OPTIONS = {
+    'vietcombank': 'Vietcombank',
+    'bidv': 'BIDV',
+    'techcombank': 'Techcombank',
+    'vpbank': 'VPBank',
+    'acb': 'ACB',
+    'mb': 'MB',
+    'agribank': 'Agribank',
+    'sacombank': 'Sacombank',
+    'donga': 'Dong A',
+    'vib': 'VIB',
+}
+
 # Selenium WebDriver settings
 WEBDRIVER_CONFIG = {
     'headless': False,  # Đặt True để chạy ẩn
@@ -37,6 +51,14 @@ ACCOUNT_CONFIG = {
     'verify_email': False,
 }
 
+# Phone number settings
+PHONE_CONFIG = {
+    'use_phone': False,  # Sử dụng SĐT để đăng ký
+    'no_otp': True,      # SĐT không cần OTP
+    'with_otp': False,   # SĐT có OTP
+    'verify_phone': False,  # Xác minh SĐT
+}
+
 # Logging settings
 LOG_CONFIG = {
     'level': 'INFO',
@@ -46,5 +68,15 @@ LOG_CONFIG = {
 # Proxy settings (tuỳ chọn)
 PROXY_CONFIG = {
     'enabled': False,
-    'url': os.getenv('PROXY_URL', 'http://proxy.example.com:8080'),
+    'proxy_list': [],
+    'rotate': False,
+}
+
+# Data file settings
+DATA_FILE_CONFIG = {
+    'enabled': False,
+    'account_data_file': 'TK_REG.txt',  # username|password|email
+    'phone_no_otp_file': 'sdt.txt',     # Danh sách SĐT không OTP
+    'success_file': 'ACC_OK.txt',       # Tài khoản đăng ký thành công
+    'fail_file': 'FAIL.txt',             # Tài khoản đăng ký không thành công
 }

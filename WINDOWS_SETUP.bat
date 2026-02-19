@@ -69,7 +69,7 @@ echo.
 echo [3/3] Building Windows executable...
 echo This may take 1-2 minutes...
 echo.
-python -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
+python -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher_advanced.py
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to build executable
     pause

@@ -23,6 +23,8 @@ from utils import (
     setup_logger, 
     AccountData, 
     save_account,
+    save_successful_account,
+    save_failed_account,
     wait_random,
 )
 
@@ -30,13 +32,18 @@ from utils import (
 class GameAccountRegistrar:
     """Lớp chính để đăng ký tài khoản game"""
     
-    def __init__(self, game_name='default', headless=False):
+    def __init__(self, game_name='default', headless=False, url=None, proxy=None, 
+                 bank='vietcombank', phone_mode='none'):
         """
         Khởi tạo registrar
         
         Args:
             game_name: Tên game (key trong GAME_SERVERS)
             headless: Chạy ẩn (không hiển thị trình duyệt)
+            url: URL custom để đăng ký (nếu không cung cấp, dùng từ GAME_SERVERS)
+            proxy: Proxy URL (tuỳ chọn)
+            bank: Ngân hàng được chọn
+            phone_mode: 'none', 'no_otp', 'with_otp'
         """
         self.logger = setup_logger(
             'GameAccountRegistrar',
@@ -52,10 +59,23 @@ class GameAccountRegistrar:
         self.game_name = game_name
         self.logger.info(f"Khởi tạo cho trò chơi: {self.game_config['name']}")
         
+        # Custom URL if provided
+        if url:
+            self.game_config['url'] = url
+            self.logger.info(f"Sử dụng URL custom: {url}")
+        
         self.driver = None
         self.headless = headless
         self.wait = None
         self.account_data = None
+        self.proxy = proxy
+        self.bank = bank
+        self.phone_mode = phone_mode
+        
+        if proxy:
+            self.logger.info(f"Sử dụng Proxy: {proxy}")
+        self.logger.info(f"Ngân hàng: {bank}")
+        self.logger.info(f"Phone Mode: {phone_mode}")
     
     def setup_driver(self):
         """Thiết lập Selenium WebDriver"""
@@ -75,6 +95,11 @@ class GameAccountRegistrar:
             options.add_argument('--disable-blink-features=AutomationControlled')
             options.add_experimental_option("excludeSwitches", ["enable-automation"])
             options.add_experimental_option('useAutomationExtension', False)
+            
+            # Proxy support
+            if self.proxy:
+                options.add_argument(f'--proxy-server={self.proxy}')
+                self.logger.info(f"Thêm Proxy: {self.proxy}")
             
             # User Agent để tránh detection
             options.add_argument(
@@ -364,19 +389,47 @@ class GameAccountRegistrar:
             
             # Kiểm tra kết quả
             if self.check_success():
-                # Lưu tài khoản
-                save_account(
+                # Lưu tài khoản thành công
+                save_successful_account(
                     self.account_data.username,
                     self.account_data.password,
-                    self.account_data.email
+                    self.account_data.email,
+                    phone='',
+                    bank=self.bank,
+                    url=self.game_config['url'],
+                    filename='ACC_OK.txt'
                 )
-                self.logger.info("✓ Tài khoản đã được lưu")
+                self.logger.info("✓ Tài khoản đã được lưu vào ACC_OK.txt")
                 return True
-            
-            return False
+            else:
+                # Lưu tài khoản fail
+                save_failed_account(
+                    self.account_data.username,
+                    self.account_data.password,
+                    self.account_data.email,
+                    phone='',
+                    bank=self.bank,
+                    url=self.game_config['url'],
+                    error_msg='Không xác nhận đăng ký thành công',
+                    filename='FAIL.txt'
+                )
+                self.logger.error("✗ Tài khoản lưu vào FAIL.txt")
+                return False
             
         except Exception as e:
             self.logger.error(f"Lỗi trong quá trình đăng ký: {e}")
+            # Lưu account fail với error message
+            if self.account_data:
+                save_failed_account(
+                    self.account_data.username,
+                    self.account_data.password,
+                    self.account_data.email,
+                    phone='',
+                    bank=self.bank,
+                    url=self.game_config['url'],
+                    error_msg=str(e),
+                    filename='FAIL.txt'
+                )
             return False
         
         finally:
