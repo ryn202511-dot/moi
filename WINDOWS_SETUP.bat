@@ -47,6 +47,19 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+echo Checking PyInstaller installation...
+python -m pip show pyinstaller >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] PyInstaller not installed
+    echo Trying to install again...
+    pip install --no-cache-dir pyinstaller==6.19.0
+    if %errorlevel% neq 0 (
+        echo [ERROR] Failed to install PyInstaller
+        pause
+        exit /b 1
+    )
+)
+
 echo.
 echo [2/3] Cleaning previous builds...
 rmdir /s /q build dist 2>nul
@@ -56,7 +69,7 @@ echo.
 echo [3/3] Building Windows executable...
 echo This may take 1-2 minutes...
 echo.
-pyinstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
+python -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to build executable
     pause
