@@ -36,9 +36,13 @@ if not exist "requirements.txt" (
 )
 
 echo [1/3] Installing Python dependencies...
-pip install -r requirements.txt
+echo Upgrading pip...
+python -m pip install --upgrade pip
+echo Installing packages...
+pip install --no-cache-dir -r requirements.txt
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install dependencies
+    echo Try running again with: python -m pip install --upgrade pip
     pause
     exit /b 1
 )

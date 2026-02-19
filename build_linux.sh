@@ -17,7 +17,10 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 echo "[1/3] Installing dependencies..."
-pip3 install -r requirements.txt
+echo "Upgrading pip..."
+pip3 install --upgrade pip
+echo "Installing packages..."
+pip3 install --no-cache-dir -r requirements.txt
 
 echo ""
 echo "[2/3] Cleaning old build..."
