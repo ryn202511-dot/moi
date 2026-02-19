@@ -1,15 +1,26 @@
 """
-Advanced Game Account Registrar with Full UI
-GUI hoàn chỉnh cho đăng ký tài khoản game với các tính năng nâng cao
+Advanced Game Account Registrar with Selenium Integration
+GUI hoàn chỉnh với Selenium tự động đăng ký thực tế
 """
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 import threading
 import os
 import json
+import requests
 from datetime import datetime
 from game_account_registrar import GameAccountRegistrar
 from config import GAME_SERVERS
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+import time
+import random
 
 
 class AdvancedGUILauncher:
@@ -233,7 +244,8 @@ class AdvancedGUILauncher:
         thread.start()
     
     def run_registration(self):
-        """Chạy quá trình đăng ký"""
+        """Chạy quá trình đăng ký với Selenium"""
+        driver = None
         try:
             url = self.url_var.get().strip()
             game = self.game_var.get()
@@ -243,17 +255,16 @@ class AdvancedGUILauncher:
             api_key = self.api_key_var.get().strip() if use_otp else None
             
             self.log(f"\n{'='*60}", "info")
-            self.log("GAME ACCOUNT REGISTRAR - ADVANCED", "info")
+            self.log("GAME ACCOUNT REGISTRAR - ADVANCED SELENIUM", "info")
             self.log(f"{'='*60}", "info")
-            self.log(f"URL: {url}", "info")
-            self.log(f"Game: {game}", "info")
-            self.log(f"Proxy: {proxy or '(không dùng)'}", "info")
-            self.log(f"SDT OTP: {'Có' if use_otp else 'Không'}", "info")
-            self.log(f"Headless: {headless}\n", "info")
+            self.log(f"📍 URL: {url}", "info")
+            self.log(f"🎮 Game: {game}", "info")
+            self.log(f"🔗 Proxy: {proxy or '(không dùng)'}", "info")
+            self.log(f"📱 SDT OTP: {'Có' if use_otp else 'Không'}", "info")
+            self.log(f"🔐 Headless: {headless}\n", "info")
             
             success_count = 0
             fail_count = 0
-            
             total = len(self.accounts_data)
             
             for idx, line in enumerate(self.accounts_data):
@@ -265,11 +276,14 @@ class AdvancedGUILauncher:
                 self.current_label.config(text=f"► Đang xử lý: {idx + 1}/{total}")
                 self.status_var.set(f"Đăng ký {idx + 1}/{total}...")
                 
+                driver = None
                 try:
                     # Parse account data
                     parts = line.split('|')
                     if len(parts) < 2:
                         self.log(f"[{idx + 1}] ✗ Format không hợp lệ: {line}", "error")
+                        with open('FAIL.TXT', 'a', encoding='utf-8') as f:
+                            f.write(f"{line}|ERROR: Format không hợp lệ\n")
                         fail_count += 1
                         continue
                     
@@ -277,26 +291,142 @@ class AdvancedGUILauncher:
                     email = parts[1].strip() if len(parts) > 1 else ""
                     password = parts[2].strip() if len(parts) > 2 else ""
                     
-                    self.log(f"\n[{idx + 1}/{total}] Đăng ký: {username}", "info")
+                    self.log(f"\n[{idx + 1}/{total}] 🔄 Bắt đầu đăng ký: {username}", "info")
+                    self.log(f"  📧 Email: {email}", "info")
+                    self.log(f"  🔑 Password: ***{password[-3:]}", "info")
                     
-                    # Add more logging here
-                    self.log(f"  Email: {email}", "info")
-                    
+                    sdt = None
                     if use_otp and self.sdt_data:
                         sdt = self.sdt_data[idx % len(self.sdt_data)]
-                        self.log(f"  SDT OTP: {sdt}", "info")
-                        self.log(f"  API Key: ***{api_key[-4:] if len(api_key) > 4 else api_key}", "info")
+                        self.log(f"  📱 SDT OTP: {sdt}", "info")
+                        self.log(f"  🔐 API Key: ***{api_key[-4:] if len(api_key) > 4 else api_key}", "info")
                     
-                    # Simulate registration process (replace with actual implementation)
-                    import time
-                    time.sleep(1)
+                    # Setup Selenium WebDriver
+                    self.log(f"  ▶ Khởi tạo Chrome WebDriver...", "info")
+                    options = Options()
                     
-                    # Save success
-                    with open('ACC OK.TXT', 'a', encoding='utf-8') as f:
-                        f.write(f"{username}|{password}|{email}\n")
+                    if headless:
+                        options.add_argument('--headless')
+                        self.log(f"  ▶ Chế độ Headless: ON", "info")
                     
-                    self.log(f"  ✓ Đăng ký thành công!", "success")
-                    success_count += 1
+                    options.add_argument('--no-sandbox')
+                    options.add_argument('--disable-dev-shm-usage')
+                    options.add_argument('--disable-blink-features=AutomationControlled')
+                    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+                    options.add_experimental_option('useAutomationExtension', False)
+                    
+                    if proxy:
+                        options.add_argument(f'--proxy-server={proxy}')
+                        self.log(f"  ▶ Sử dụng Proxy: {proxy}", "info")
+                    
+                    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+                    
+                    service = Service(ChromeDriverManager().install())
+                    driver = webdriver.Chrome(service=service, options=options)
+                    self.log(f"  ✓ WebDriver khởi tạo thành công", "success")
+                    
+                    # Navigate to URL
+                    self.log(f"  ▶ Truy cập: {url}", "info")
+                    driver.get(url)
+                    time.sleep(random.uniform(2, 4))
+                    self.log(f"  ✓ Trang được tải", "success")
+                    
+                    # Try to fill form fields - Look for common selectors
+                    wait = WebDriverWait(driver, 10)
+                    
+                    # Try to fill username field
+                    try:
+                        self.log(f"  ▶ Tìm trường Username...", "info")
+                        username_field = wait.until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, "input[name*='username'], input[name*='user'], input[id*='username'], #username"))
+                        )
+                        username_field.clear()
+                        username_field.send_keys(username)
+                        time.sleep(random.uniform(0.5, 1))
+                        self.log(f"  ✓ Điền Username: {username}", "success")
+                    except TimeoutException:
+                        self.log(f"  ⚠ Không tìm thấy trường Username", "warning")
+                    
+                    # Try to fill email field
+                    try:
+                        self.log(f"  ▶ Tìm trường Email...", "info")
+                        email_field = wait.until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, "input[name*='email'], input[type='email'], #email"))
+                        )
+                        email_field.clear()
+                        email_field.send_keys(email)
+                        time.sleep(random.uniform(0.5, 1))
+                        self.log(f"  ✓ Điền Email: {email}", "success")
+                    except TimeoutException:
+                        self.log(f"  ⚠ Không tìm thấy trường Email", "warning")
+                    
+                    # Try to fill password field
+                    try:
+                        self.log(f"  ▶ Tìm trường Password...", "info")
+                        password_field = wait.until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, "input[name*='password'], input[type='password'], #password"))
+                        )
+                        password_field.clear()
+                        password_field.send_keys(password)
+                        time.sleep(random.uniform(0.5, 1))
+                        self.log(f"  ✓ Điền Password", "success")
+                    except TimeoutException:
+                        self.log(f"  ⚠ Không tìm thấy trường Password", "warning")
+                    
+                    # Try to accept terms
+                    try:
+                        self.log(f"  ▶ Tìm checkbox điều khoản...", "info")
+                        terms_checkbox = driver.find_element(By.CSS_SELECTOR, "input[type='checkbox'], #terms, [name*='agree']")
+                        if not terms_checkbox.is_selected():
+                            terms_checkbox.click()
+                            time.sleep(random.uniform(0.3, 0.7))
+                            self.log(f"  ✓ Chấp nhận điều khoản", "success")
+                    except NoSuchElementException:
+                        self.log(f"  ⚠ Không tìm thấy checkbox điều khoản", "warning")
+                    
+                    # Try to submit form
+                    try:
+                        self.log(f"  ▶ Tìm nút Submit...", "info")
+                        submit_btn = wait.until(
+                            EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit'], button[name*='submit'], input[type='submit'], .btn-submit"))
+                        )
+                        self.log(f"  ▶ Gửi form...", "info")
+                        submit_btn.click()
+                        time.sleep(random.uniform(2, 4))
+                        self.log(f"  ✓ Form đã được gửi", "success")
+                    except TimeoutException:
+                        self.log(f"  ⚠ Không tìm thấy nút Submit", "warning")
+                    
+                    # Check if registration was successful
+                    self.log(f"  ▶ Kiểm tra kết quả...", "info")
+                    time.sleep(2)
+                    
+                    page_source = driver.page_source.lower()
+                    current_url = driver.current_url
+                    
+                    success = False
+                    if 'success' in page_source or 'welcome' in page_source or 'registered' in page_source:
+                        success = True
+                        self.log(f"  ✓ Phát hiện từ khóa thành công trên trang", "success")
+                    
+                    if current_url != url:
+                        success = True
+                        self.log(f"  ✓ URL đã thay đổi - Có thể thành công", "success")
+                    
+                    if success:
+                        # Save success
+                        with open('ACC OK.TXT', 'a', encoding='utf-8') as f:
+                            f.write(f"{username}|{password}|{email}\n")
+                        
+                        self.log(f"  ✓✓✓ ĐĂNG KÝ THÀNH CÔNG! ✓✓✓", "success")
+                        success_count += 1
+                    else:
+                        # Save failed
+                        with open('FAIL.TXT', 'a', encoding='utf-8') as f:
+                            f.write(f"{line}|ERROR: Không xác nhận được thành công\n")
+                        
+                        self.log(f"  ✗ Không xác nhận được đăng ký thành công", "error")
+                        fail_count += 1
                     
                 except Exception as e:
                     self.log(f"  ✗ Lỗi: {str(e)}", "error")
@@ -307,25 +437,46 @@ class AdvancedGUILauncher:
                     
                     fail_count += 1
                 
+                finally:
+                    if driver:
+                        try:
+                            driver.quit()
+                            self.log(f"  ▶ WebDriver đã đóng", "info")
+                        except:
+                            pass
+                
                 self.success_label.config(text=f"✓ Thành công: {success_count}")
                 self.fail_label.config(text=f"✗ Thất bại: {fail_count}")
+                
+                # Random delay between accounts
+                if idx < total - 1:
+                    delay = random.uniform(3, 5)
+                    self.log(f"  ⏳ Chờ {delay:.1f}s trước tài khoản tiếp theo...\n", "info")
+                    time.sleep(delay)
             
             # Summary
             self.log(f"\n{'='*60}", "info")
-            self.log("TỔNG KẾT", "info")
-            self.log(f"✓ Thành công: {success_count}", "success")
-            self.log(f"✗ Thất bại: {fail_count}", "error")
+            self.log("📊 TỔNG KẾT KẾT QUẢ", "info")
+            self.log(f"{'='*60}", "info")
+            self.log(f"✓ Thành công: {success_count}/{total}", "success")
+            self.log(f"✗ Thất bại: {fail_count}/{total}", "error")
+            self.log(f"📁 Lưu vào: ACC OK.TXT & FAIL.TXT", "info")
             self.log(f"{'='*60}\n", "info")
             
             self.status_var.set("Hoàn thành")
             self.progress['value'] = 100
-            messagebox.showinfo("Hoàn thành", f"Thành công: {success_count}\nThất bại: {fail_count}")
+            messagebox.showinfo("Hoàn thành", f"✓ Thành công: {success_count}\n✗ Thất bại: {fail_count}\n\nKết quả lưu trong:\n- ACC OK.TXT\n- FAIL.TXT")
             
         except Exception as e:
-            self.log(f"Lỗi nghiêm trọng: {str(e)}", "error")
-            messagebox.showerror("Lỗi", f"Lỗi: {str(e)}")
+            self.log(f"❌ Lỗi nghiêm trọng: {str(e)}", "error")
+            messagebox.showerror("Lỗi", f"❌ Lỗi: {str(e)}")
         
         finally:
+            if driver:
+                try:
+                    driver.quit()
+                except:
+                    pass
             self.is_running = False
             self.start_btn.config(state=tk.NORMAL)
             self.stop_btn.config(state=tk.DISABLED)
