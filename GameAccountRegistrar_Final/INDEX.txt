@@ -1,0 +1,334 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║           GAME ACCOUNT REGISTRAR v2.1-OTP STANDALONE PACKAGE                 ║
+║                    📦 DANH SÁCH TỆP TIN & HƯỚNG DẪN                          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+📁 CÁC TỆP TIN TRONG PACKAGE:
+═══════════════════════════════════════════════════════════════════════════════
+
+[1] 🎯 GameAccountRegistrar_Standalone.py (847 KB) ⭐ FILE CHÍNH
+    ─────────────────────────────────────────────
+    Đây là chương trình chính - chứa TẤT CẢ code:
+    ✓ Giao diện GUI (Tkinter)
+    ✓ API CodeSim integration
+    ✓ Selenium WebDriver automation
+    ✓ Account generation (username, password, email, phone)
+    ✓ Result logging (ACC_OK.txt, FAIL.txt)
+    
+    Cách chạy:
+    - Windows: python GameAccountRegistrar_Standalone.py
+    - Mac/Linux: python3 GameAccountRegistrar_Standalone.py
+    
+    Hoặc build thành .exe:
+    - Chạy: build_to_exe.bat (Windows)
+    - Kết quả: dist/GameAccountRegistrar.exe
+
+
+[2] 🔨 build_to_exe.bat (2 KB)
+    ──────────────────────────
+    Windows batch script để build standalone .exe
+    
+    Cách sử dụng:
+    1. Double-click file này
+    2. Chờ process hoàn thành (2-5 phút)
+    3. File .exe sẽ ở: dist/GameAccountRegistrar.exe
+    
+    Chú ý:
+    - Chỉ dùng trên Windows
+    - Cần cài Python trước
+    - Để *.exe chạy trên PC khác không cần cài Python
+
+
+[3] 📋 requirements.txt (120 bytes)
+    ───────────────────────────────
+    Danh sách các dependency cần cài qua pip:
+    
+    - selenium==4.15.2          (Automation browser)
+    - webdriver-manager==4.0.1  (Manage ChromeDriver)
+    - requests==2.31.0          (HTTP client for CodeSim API)
+    
+    Cách sử dụng:
+    pip install -r requirements.txt
+
+
+[4] 📖 SETUP_QUICK.txt (8 KB)
+    ─────────────────────────
+    ⭐ BẮT ĐẦU TỰA ĐÂY
+    
+    Hướng dẫn setup nhanh 4 bước:
+    1. Installation (cài dependencies)
+    2. Run (chạy chương trình)
+    3. Setup CodeSim API (nếu cần OTP)
+    4. Cách sử dụng (workflows)
+    
+    + Troubleshooting Q&A
+    + Tips & tricks
+    
+    👉 Đọc file này trước!
+
+
+[5] 📑 INDEX.txt (File này)
+    ───────────────────────
+    Giải thích mỗi file trong package
+
+
+[6] 📚 README_STANDALONE.txt (10 KB)
+    ─────────────────────────────────
+    Hướng dẫn chi tiết (Tiếng Việt):
+    ✓ Danh sách files
+    ✓ Cách chạy nhanh
+    ✓ Giao diện GUI chi tiết
+    ✓ Setup CodeSim API
+    ✓ Hướng dẫn từng bước
+    ✓ Kết quả output
+    ✓ Build thành .exe
+    ✓ Troubleshooting
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK START (CÁC BƯỚC CƠ BẢN):
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Đọc SETUP_QUICK.txt  ← ĐỌC TỪ ĐÂY
+        └─ Hiểu quy trình cài đặt
+
+STEP 2: Cài dependencies
+        pip install -r requirements.txt
+
+STEP 3: Chạy chương trình
+        python GameAccountRegistrar_Standalone.py
+
+STEP 4: Dùng GUI
+        ├─ Nhập URL
+        ├─ Chọn Bank
+        ├─ Chọn Phone Mode
+        └─ Nhấn "▶ Bắt đầu"
+
+STEP 5: Xem kết quả
+        ├─ ACC_OK.txt (thành công)
+        └─ FAIL.txt (thất bại)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 FILE SIZE & STRUCTURE:
+═══════════════════════════════════════════════════════════════════════════════
+
+                     FILE SIZE          CHỨC NĂNG
+    ──────────────────────────────────────────────────
+    - GameAccountRegistrar_Standalone.py    847 KB     Main program
+    - build_to_exe.bat                      2 KB       Build script
+    - requirements.txt                      120 B      Dependencies
+    - SETUP_QUICK.txt                       8 KB       Quick guide
+    - README_STANDALONE.txt                 10 KB      Full documentation
+    - INDEX.txt                             File này   File index
+
+    Total: ~867 KB (Uncompressed)
+           ~200 KB (Compressed as .zip)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 USE CASES (CÁC TRƯờNG HỢP SỬ DỤNG):
+═══════════════════════════════════════════════════════════════════════════════
+
+1. DEVELOPMENT (Developer)
+   → Chạy: python GameAccountRegistrar_Standalone.py
+   → Có thể edit code nếu cần
+   → Xem logs realtime
+
+2. END USER (Người dùng bình thường)
+   → Chạy: build_to_exe.bat
+   → Sử dụng: dist/GameAccountRegistrar.exe
+   → Không cần Python cài trên máy
+
+3. BATCH OPERATION (Đăng ký nhiều tài khoản)
+   → Setting: "Số lượng" = số tài khoản
+   → Kết quả: ACC_OK.txt + FAIL.txt
+   → Có thể import vào spreadsheet
+
+4. SERVER AUTOMATION (Chạy trên server)
+   → Cần xóa --windowed flag từ build_to_exe.bat
+   → Hoặc chạy headless + redirect logs
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔑 CODE ARCHITECTURE (TỔNG QUAN CODE):
+═══════════════════════════════════════════════════════════════════════════════
+
+GameAccountRegistrar_Standalone.py (One file contains all):
+
+┌─ PART 1: CodeSim API
+│  └─ Class CodeSimAPI
+│     ├─ get_balance()
+│     ├─ rent_number()
+│     ├─ get_otp()
+│     └─ release_number()
+│
+├─ PART 2: Utilities
+│  ├─ generate_username()
+│  ├─ generate_password()
+│  ├─ generate_email()
+│  ├─ generate_phone_number()
+│  ├─ save_successful_account()
+│  ├─ save_failed_account()
+│  └─ Class AccountData
+│
+├─ PART 3: Game Account Registrar
+│  └─ Class GameAccountRegistrar
+│     ├─ setup_driver()
+│     ├─ navigate_to_register_page()
+│     ├─ fill_field()
+│     ├─ get_otp_from_codesim()
+│     └─ register()
+│
+├─ PART 4: GUI
+│  ├─ Class ScrollableFrame
+│  └─ Class GUILauncher
+│     ├─ create_widgets()
+│     ├─ check_balance()
+│     ├─ start()
+│     ├─ run()
+│     └─ stop()
+│
+└─ main():
+   └─ tk.Tk() → GUILauncher → root.mainloop()
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚙️ SYSTEM REQUIREMENTS:
+═══════════════════════════════════════════════════════════════════════════════
+
+Minimum:
+  ✓ Python 3.8 hoặc cao hơn
+  ✓ 100 MB dung lượng ổ đĩa
+  ✓ 2 GB RAM
+  ✓ Internet connection (để download ChromeDriver)
+
+Dependencies (auto-install):
+  ✓ selenium 4.15.2+ (Web automation)
+  ✓ webdriver-manager 4.0.1+ (Manage browser drivers)
+  ✓ requests 2.31.0+ (HTTP library)
+
+Browser:
+  ✓ Google Chrome/Chromium (auto-download via webdriver-manager)
+
+Optional (nếu dùng OTP):
+  ✓ CodeSim account + API key
+  ✓ Internet để gọi CodeSim API
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 FEATURES SUMMARY:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ CORE:
+   • Custom URL input
+   • Proxy support
+   • 10 Vietnamese banks
+   • Auto account generation
+   • Form filling automation
+
+✅ PHONE MODES:
+   • Mode 1: Không dùng SĐT
+   • Mode 2: SĐT không OTP (từ file)
+   • Mode 3: SĐT có OTP (từ CodeSim API)
+
+✅ OTP INTEGRATION:
+   • CodeSim API client
+   • 20+ services (Gmail, WhatsApp, Facebook, etc.)
+   • Auto phone rental & release
+   • Balance checking
+   • OTP extraction & validation
+
+✅ LOGGING:
+   • ACC_OK.txt (success accounts)
+   • FAIL.txt (failed with error details)
+   • Realtime GUI logging
+   • Color-coded output
+
+✅ GUI:
+   • Tkinter interface
+   • Scrollable form
+   • Multiple input fields
+   • Real-time log display
+   • Status bar
+   • Start/Stop buttons
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎓 LEARNING RESOURCES:
+═══════════════════════════════════════════════════════════════════════════════
+
+Để hiểu thêm:
+  1. Selenium WebDriver: https://selenium.dev/documentation/
+  2. Tkinter GUI: https://docs.python.org/3/library/tkinter.html
+  3. CodeSim API: https://codesim.net/api/docs
+  4. Python Requests: https://requests.readthedocs.io/
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ FAQ:
+═══════════════════════════════════════════════════════════════════════════════
+
+Q: Tệp này có thể chạy trên Linux/Mac không?
+A: Có! Chỉ file build_to_exe.bat là Windows-only.
+   Chạy: python3 GameAccountRegistrar_Standalone.py
+
+Q: Có thể edit code không?
+A: Có! Mở GameAccountRegistrar_Standalone.py bằng text editor
+   (VS Code, Sublime, Notepad++, etc.)
+
+Q: Dữ liệu có được gửi đâu không?
+A: Không. Tất cả dữ liệu được tạo locally.
+   Chỉ gọi API đến CodeSim (nếu dùng OTP)
+
+Q: Có thể chạy nhiều instances cùng lúc không?
+A: Có, nhưng đảm bảo mỗi instance dùng folder khác
+   để tránh conflict ACC_OK.txt/FAIL.txt
+
+Q: Vì sao Chrome mở ra?
+A: Tool dùng Selenium để tự động trình duyệt.
+   Dùng Headless mode nếu không muốn thấy.
+
+Q: Timeout quá lâu?
+A: Thử tăng wait time trong code
+   hoặc check internet connection
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 NEXT STEPS:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Đọc SETUP_QUICK.txt
+2. Làm theo các bước installation
+3. Chạy chương trình
+4. Thử with test URL trước
+5. Nếu OK → setup CodeSim API
+6. Chạy batch registration
+7. Kiểm tra ACC_OK.txt
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📞 SUPPORT & FEEDBACK:
+═══════════════════════════════════════════════════════════════════════════════
+
+Issues: https://github.com/ryn202511-dot/moi/issues
+Email: Contact through GitHub
+Documentation: README_STANDALONE.txt + SETUP_QUICK.txt
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                     ✨ Everything you need in ONE file! ✨
+                          Enjoy automated registration!
+
+═══════════════════════════════════════════════════════════════════════════════
