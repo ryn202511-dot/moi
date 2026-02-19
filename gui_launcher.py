@@ -177,6 +177,57 @@ class GUILauncher:
                                 variable=self.phone_mode_var, value='with_otp')
         radio3.pack(side=tk.LEFT, padx=5)
         
+        # ===== CODESIM OTP CONFIG =====
+        otp_frame = ttk.LabelFrame(cf, text="📱 OTP từ CodeSim (https://codesim.net/)", padding=8)
+        otp_frame.pack(fill=tk.X, pady=5)
+        
+        api_label = ttk.Label(otp_frame, text="CodeSim API Key:")
+        api_label.grid(row=0, column=0, sticky='w', padx=5, pady=5)
+        
+        self.codesim_api_var = tk.StringVar(value='')
+        api_entry = ttk.Entry(otp_frame, textvariable=self.codesim_api_var, width=60, 
+                             show='*')
+        api_entry.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
+        
+        # Service selection
+        service_label = ttk.Label(otp_frame, text="Chọn Service:")
+        service_label.grid(row=1, column=0, sticky='w', padx=5, pady=5)
+        
+        self.codesim_service_var = tk.StringVar(value='gmail')
+        services = ['gmail', 'whatsapp', 'facebook', 'instagram', 'telegram', 
+                   'line', 'twitter', 'tiktok', 'discord', 'paypal', 'uber', 
+                   'airbnb', 'booking', 'snapchat']
+        service_combo = ttk.Combobox(
+            otp_frame,
+            textvariable=self.codesim_service_var,
+            values=services,
+            state='readonly',
+            width=30
+        )
+        service_combo.grid(row=1, column=1, sticky='w', padx=5, pady=5)
+        
+        # OTP wait time
+        wait_label = ttk.Label(otp_frame, text="Thời gian chờ OTP (giây):")
+        wait_label.grid(row=2, column=0, sticky='w', padx=5, pady=5)
+        
+        self.otp_wait_var = tk.StringVar(value='60')
+        wait_spin = ttk.Spinbox(
+            otp_frame,
+            from_=10,
+            to=300,
+            textvariable=self.otp_wait_var,
+            width=30
+        )
+        wait_spin.grid(row=2, column=1, sticky='w', padx=5, pady=5)
+        
+        # Balance button
+        balance_btn = ttk.Button(
+            otp_frame,
+            text="🔍 Kiểm tra số dư",
+            command=self.check_codesim_balance
+        )
+        balance_btn.grid(row=3, column=0, columnspan=2, sticky='ew', padx=5, pady=5)
+        
         # ===== GENERAL CONFIG =====
         config_frame = ttk.LabelFrame(cf, text="⚙️ Cấu hình chung", padding=8)
         config_frame.pack(fill=tk.X, pady=5)
@@ -266,6 +317,27 @@ class GUILauncher:
         else:
             self.proxy_entry.config(state=tk.DISABLED)
     
+    def check_codesim_balance(self):
+        """Kiểm tra số dư CodeSim"""
+        api_key = self.codesim_api_var.get().strip()
+        if not api_key:
+            messagebox.showwarning("Cảnh báo", "Vui lòng nhập API Key CodeSim")
+            return
+        
+        try:
+            from codesim_api import CodeSimAPI
+            api = CodeSimAPI(api_key)
+            balance = api.get_balance()
+            if balance is not None:
+                messagebox.showinfo("CodeSim Balance", f"Số dư: {balance}")
+                self.log(f"✓ Số dư CodeSim: {balance}", "success")
+            else:
+                messagebox.showerror("Lỗi", "Không thể lấy số dư. Kiểm tra API Key")
+                self.log("✗ Không thể kết nối CodeSim API", "error")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Lỗi: {str(e)}")
+            self.log(f"✗ Lỗi kiểm tra CodeSim: {str(e)}", "error")
+    
     def browse_file(self, var):
         """Chọn file"""
         filename = filedialog.askopenfilename(
@@ -321,6 +393,9 @@ class GUILauncher:
             phone_mode = self.phone_mode_var.get()
             acc_file = self.acc_file_var.get()
             phone_file = self.phone_file_var.get()
+            codesim_api_key = self.codesim_api_var.get().strip()
+            codesim_service = self.codesim_service_var.get()
+            otp_wait = int(self.otp_wait_var.get())
             
             self.status_var.set(f"Đang xử lý...")
             self.log(f"\n{'='*60}")
@@ -332,6 +407,11 @@ class GUILauncher:
             self.log(f"SĐT Mode: {phone_mode}", "info")
             self.log(f"Account File: {acc_file}", "info")
             self.log(f"Phone File: {phone_file}", "info")
+            
+            if phone_mode == 'with_otp' and codesim_api_key:
+                self.log(f"CodeSim Service: {codesim_service}", "info")
+                self.log(f"OTP Wait Time: {otp_wait}s", "info")
+            
             self.log(f"Số lượng: {count}", "info")
             self.log(f"Headless: {headless}\n", "info")
             
@@ -352,7 +432,10 @@ class GUILauncher:
                         proxy=proxy,
                         bank=bank,
                         phone_mode=phone_mode,
-                        headless=headless
+                        headless=headless,
+                        codesim_api_key=codesim_api_key,
+                        codesim_service=codesim_service,
+                        otp_wait_seconds=otp_wait
                     )
                     
                     if registrar.register():

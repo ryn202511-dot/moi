@@ -33,7 +33,8 @@ class GameAccountRegistrar:
     """Lớp chính để đăng ký tài khoản game"""
     
     def __init__(self, game_name='default', headless=False, url=None, proxy=None, 
-                 bank='vietcombank', phone_mode='none'):
+                 bank='vietcombank', phone_mode='none', codesim_api_key='',
+                 codesim_service='gmail', otp_wait_seconds=60):
         """
         Khởi tạo registrar
         
@@ -44,6 +45,9 @@ class GameAccountRegistrar:
             proxy: Proxy URL (tuỳ chọn)
             bank: Ngân hàng được chọn
             phone_mode: 'none', 'no_otp', 'with_otp'
+            codesim_api_key: API key từ CodeSim
+            codesim_service: Service name trên CodeSim (gmail, whatsapp, etc.)
+            otp_wait_seconds: Thời gian chờ OTP (giây)
         """
         self.logger = setup_logger(
             'GameAccountRegistrar',
@@ -71,11 +75,21 @@ class GameAccountRegistrar:
         self.proxy = proxy
         self.bank = bank
         self.phone_mode = phone_mode
+        self.codesim_api_key = codesim_api_key
+        self.codesim_service = codesim_service
+        self.otp_wait_seconds = otp_wait_seconds
+        self.otp_phone = None
+        self.otp_code = None
+        self.rental_id = None
         
         if proxy:
             self.logger.info(f"Sử dụng Proxy: {proxy}")
         self.logger.info(f"Ngân hàng: {bank}")
         self.logger.info(f"Phone Mode: {phone_mode}")
+        
+        if phone_mode == 'with_otp' and codesim_api_key:
+            self.logger.info(f"CodeSim Service: {codesim_service}")
+            self.logger.info(f"OTP Wait Time: {otp_wait_seconds}s")
     
     def setup_driver(self):
         """Thiết lập Selenium WebDriver"""
@@ -266,6 +280,62 @@ class GameAccountRegistrar:
             self.logger.error(f"Lỗi chấp nhận điều khoản: {e}")
             return False
     
+    def get_otp_from_codesim(self):
+        """
+        Thuê số điện thoại từ CodeSim và lấy OTP
+        
+        Returns:
+            Dict {'phone': số điện thoại, 'otp': mã OTP, 'rental_id': ID}
+            hoặc None nếu lỗi
+        """
+        try:
+            from codesim_api import CodeSimAPI, SERVICE_IDS
+            
+            if not self.codesim_api_key:
+                self.logger.error("CodeSim API Key không được cung cấp")
+                return None
+            
+            api = CodeSimAPI(self.codesim_api_key)
+            
+            # Lấy service ID
+            service_id = SERVICE_IDS.get(self.codesim_service, 20)
+            
+            self.logger.info(f"Đang thuê SĐT từ CodeSim (Service: {self.codesim_service})...")
+            
+            # Thuê số
+            rental = api.rent_number(service_id, country_id=174)
+            if not rental:
+                self.logger.error("Không thể thuê SĐT từ CodeSim")
+                return None
+            
+            phone = rental['phone']
+            rental_id = rental['id']
+            
+            self.logger.info(f"✓ Đã thuê SĐT: {phone}")
+            self.otp_phone = phone
+            self.rental_id = rental_id
+            
+            # Lấy OTP
+            self.logger.info(f"Đang chờ OTP ({self.otp_wait_seconds}s)...")
+            otp = api.get_otp(rental_id, self.otp_wait_seconds)
+            
+            if not otp:
+                self.logger.error(f"Không nhận được OTP cho {phone} trong {self.otp_wait_seconds}s")
+                return None
+            
+            self.otp_code = otp
+            self.logger.info(f"✓ Lấy OTP thành công: {otp}")
+            
+            return {
+                'phone': phone,
+                'otp': otp,
+                'rental_id': rental_id
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Lỗi lấy OTP từ CodeSim: {e}")
+            return None
+    
     def submit_form(self, button_selector='button[type="submit"]'):
         """Gửi form đăng ký"""
         try:
@@ -336,6 +406,8 @@ class GameAccountRegistrar:
                                'email': '#email',
                                'password': '#password',
                                'confirm_password': '#confirm_password',
+                               'phone': '#phone',
+                               'otp': '#otp',
                                'terms': '#terms',
                                'submit': 'button[type="submit"]'
                            }
@@ -347,6 +419,8 @@ class GameAccountRegistrar:
                 'email': '#email',
                 'password': '#password',
                 'confirm_password': '#confirm_password',
+                'phone': '#phone',
+                'otp': '#otp',
                 'terms': '#terms',
                 'submit': 'button[type="submit"]'
             }
@@ -355,6 +429,28 @@ class GameAccountRegistrar:
             # Tạo dữ liệu tài khoản
             self.account_data = AccountData()
             self.logger.info(f"\nTài khoản mới:\n{self.account_data}\n")
+            
+            phone = ''
+            
+            # Lấy OTP từ CodeSim nếu cần
+            if self.phone_mode == 'with_otp' and self.codesim_api_key:
+                self.logger.info("Mode: SĐT có OTP (từ CodeSim)")
+                otp_result = self.get_otp_from_codesim()
+                
+                if not otp_result:
+                    self.logger.error("Không thể lấy OTP từ CodeSim, dừng quá trình")
+                    return False
+                
+                phone = otp_result['phone']
+                self.account_data.phone = phone
+            
+            elif self.phone_mode == 'no_otp':
+                self.logger.info("Mode: SĐT không OTP")
+                # Phone sẽ được lấy từ file ở tầng GUI
+                pass
+            
+            else:
+                self.logger.info("Mode: Không dùng SĐT")
             
             # Thiết lập driver
             if not self.setup_driver():
@@ -380,6 +476,35 @@ class GameAccountRegistrar:
             if not self.fill_confirm_password(form_selectors['confirm_password']):
                 return False
             
+            # Điền số điện thoại nếu có
+            if phone and form_selectors.get('phone'):
+                try:
+                    phone_element = self.wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, form_selectors['phone']))
+                    )
+                    phone_element.clear()
+                    phone_element.send_keys(phone)
+                    wait_random(0.5, 1)
+                    self.logger.info(f"Điền SĐT: {phone}")
+                except:
+                    self.logger.warning("Không thể điền số điện thoại")
+            
+            # Điền OTP nếu có
+            if self.otp_code and form_selectors.get('otp'):
+                try:
+                    self.logger.info("Chờ trước khi điền OTP...")
+                    wait_random(2, 3)
+                    
+                    otp_element = self.wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, form_selectors['otp']))
+                    )
+                    otp_element.clear()
+                    otp_element.send_keys(self.otp_code)
+                    wait_random(0.5, 1)
+                    self.logger.info(f"Điền OTP: {self.otp_code}")
+                except:
+                    self.logger.warning("Không thể điền OTP")
+            
             if not self.accept_terms(form_selectors['terms']):
                 return False
             
@@ -394,7 +519,7 @@ class GameAccountRegistrar:
                     self.account_data.username,
                     self.account_data.password,
                     self.account_data.email,
-                    phone='',
+                    phone=phone,
                     bank=self.bank,
                     url=self.game_config['url'],
                     filename='ACC_OK.txt'
@@ -407,7 +532,7 @@ class GameAccountRegistrar:
                     self.account_data.username,
                     self.account_data.password,
                     self.account_data.email,
-                    phone='',
+                    phone=phone,
                     bank=self.bank,
                     url=self.game_config['url'],
                     error_msg='Không xác nhận đăng ký thành công',
@@ -424,7 +549,7 @@ class GameAccountRegistrar:
                     self.account_data.username,
                     self.account_data.password,
                     self.account_data.email,
-                    phone='',
+                    phone=phone if hasattr(self, 'otp_phone') else '',
                     bank=self.bank,
                     url=self.game_config['url'],
                     error_msg=str(e),
@@ -433,6 +558,16 @@ class GameAccountRegistrar:
             return False
         
         finally:
+            # Giải phóng SĐT từ CodeSim nếu cần
+            if self.rental_id and self.phone_mode == 'with_otp':
+                try:
+                    from codesim_api import CodeSimAPI
+                    api = CodeSimAPI(self.codesim_api_key)
+                    if api.release_number(self.rental_id):
+                        self.logger.info(f"✓ Giải phóng SĐT {self.otp_phone} thành công")
+                except Exception as e:
+                    self.logger.warning(f"Lỗi giải phóng SĐT: {e}")
+            
             self.close()
     
     def close(self):

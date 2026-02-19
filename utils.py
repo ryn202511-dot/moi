@@ -133,12 +133,14 @@ class AccountData:
         self.birthdate = generate_birthdate()
         self.first_name = f"User_{random.randint(1000, 9999)}"
         self.last_name = "Test"
+        self.phone = ''  # SĐT (email từ CodeSim hoặc file)
     
     def __str__(self):
         return (
             f"Username: {self.username}\n"
             f"Password: {self.password}\n"
             f"Email: {self.email}\n"
+            f"Phone: {self.phone}\n"
             f"Birthdate: {self.birthdate}"
         )
     
@@ -148,6 +150,7 @@ class AccountData:
             'username': self.username,
             'password': self.password,
             'email': self.email,
+            'phone': self.phone,
             'birthdate': self.birthdate,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -187,3 +190,82 @@ def save_failed_account(username, password, email, phone='', bank='', url='',
     with open(filename, 'a', encoding='utf-8') as f:
         f.write(f"{timestamp}|{username}|{password}|{email}|{phone}|{bank}|{url}|{error_msg}\n")
     return True
+
+
+def get_otp_from_codesim(api_key, service_id=20, country_id=174, wait_seconds=60):
+    """
+    Thuê số điện thoại từ CodeSim và lấy OTP
+    
+    Args:
+        api_key: API key từ CodeSim
+        service_id: ID dịch vụ (mặc định 20 = PayPal)
+        country_id: ID quốc gia (mặc định 174 = Việt Nam)
+        wait_seconds: Thời gian chờ OTP tối đa (giây)
+        
+    Returns:
+        Dict {'phone': số điện thoại, 'otp': mã OTP, 'rental_id': ID thuê số}
+        hoặc None nếu lỗi
+    """
+    try:
+        from codesim_api import CodeSimAPI
+        
+        api = CodeSimAPI(api_key)
+        
+        # Kiểm tra số dư trước
+        balance = api.get_balance()
+        if balance is None:
+            logging.error("Không thể kết nối tới CodeSim API")
+            return None
+        
+        logging.info(f"Số dư CodeSim: {balance}")
+        
+        # Thuê số điện thoại
+        rental = api.rent_number(service_id, country_id)
+        if not rental:
+            logging.error("Không thể thuê số điện thoại từ CodeSim")
+            return None
+        
+        phone = rental['phone']
+        rental_id = rental['id']
+        logging.info(f"Đã thuê số: {phone}")
+        
+        # Lấy OTP
+        otp = api.get_otp(rental_id, wait_seconds)
+        if not otp:
+            logging.error(f"Không lấy được OTP cho {phone}")
+            return None
+        
+        logging.info(f"Lấy OTP thành công: {otp}")
+        
+        return {
+            'phone': phone,
+            'otp': otp,
+            'rental_id': rental_id,
+            'status': 'success'
+        }
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy OTP từ CodeSim: {e}")
+        return None
+
+
+def release_otp_number(api_key, rental_id):
+    """
+    Giải phóng số điện thoại từ CodeSim
+    
+    Args:
+        api_key: API key từ CodeSim
+        rental_id: ID thuê số để giải phóng
+        
+    Returns:
+        True nếu thành công, False nếu lỗi
+    """
+    try:
+        from codesim_api import CodeSimAPI
+        
+        api = CodeSimAPI(api_key)
+        return api.release_number(rental_id)
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi giải phóng SĐT: {e}")
+        return False

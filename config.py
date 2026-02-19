@@ -80,3 +80,13 @@ DATA_FILE_CONFIG = {
     'success_file': 'ACC_OK.txt',       # Tài khoản đăng ký thành công
     'fail_file': 'FAIL.txt',             # Tài khoản đăng ký không thành công
 }
+
+# CodeSim API settings (https://codesim.net/)
+CODESIM_CONFIG = {
+    'enabled': False,  # Bật/tắt OTP từ CodeSim
+    'api_key': os.getenv('CODESIM_API_KEY', ''),  # Lấy từ .env hoặc biến môi trường
+    'service_id': 20,  # Service ID (mặc định 20 = PayPal, có thể thay đổi)
+    'country_id': 174,  # Country ID (174 = Việt Nam)
+    'wait_otp_seconds': 60,  # Thời gian chờ OTP tối đa (giây)
+    'auto_release': True,  # Tự động giải phóng số sau khi sử dụng
+}
