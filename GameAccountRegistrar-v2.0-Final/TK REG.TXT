@@ -1,0 +1,9 @@
+"""
+Sample TK REG.TXT - Account data file
+Format: username|email|password
+"""
+user_abc123|user_abc@gmail.com|Pass123!@#
+user_def456|user_def@gmail.com|Pass456!@#
+user_ghi789|user_ghi@gmail.com|Pass789!@#
+user_jkl012|user_jkl@gmail.com|Pass012!@#
+user_mno345|user_mno@gmail.com|Pass345!@#

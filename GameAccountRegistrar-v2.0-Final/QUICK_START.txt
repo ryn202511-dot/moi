@@ -1,0 +1,136 @@
+===================================================
+  GAME ACCOUNT REGISTRAR - QUICK START GUIDE
+===================================================
+
+FILE .EXE DA DUOC TAO THANH CONG!
+
+VI TRI: /dist/GameAccountRegistrar (45MB)
+
+---
+
+CACH CHAY CO NGAY:
+
+1. WINDOWS - CACH 1 (NHANH NHAT - CHI CAN PYTHON):
+   ├─ 1. Cai Python tu: https://www.python.org
+   │     (Nho tick "Add Python to PATH")
+   ├─ 2. Double-click: WINDOWS_SETUP.bat
+   ├─ 3. Cho build xong (1-2 phut)
+   └─ 4. Chay: dist\GameAccountRegistrar.exe
+
+2. WINDOWS - CACH 2 (Tu file batch san co):
+   ├─ (Neu da build .exe)
+   └─ Double-click: dist\run.bat
+
+3. WINDOWS - CACH 3 (Python mode - khong can build):
+   ├─ 1. Cai Python tu: https://www.python.org
+   ├─ 2. Mo CMD (Win+R -> cmd)
+   ├─ 3. Chay: python gui_launcher.py
+   └─ 4. GUI se hien len
+
+4. LINUX/MAC:
+   └─ ./dist/GameAccountRegistrar
+
+---
+
+GIAO DIEN CHUONG TRINH:
+
++------------------------------------------+
+| Game Account Registrar Tool              |
+| Cong cu tu dong dang ky tai khoan game   |
++------------------------------------------+
+| [Chon Game:] [Game1 v]                  |
+| [So luong:]  [10]                        |
+| [x] Che do Headless                      |
++------------------------------------------+
+| [> Bat dau]  [Stop]  [Clear log]        |
++------------- LOG ----------+
+| [17:24:15] Khoi tao Chrome WebDriver    |
+| [17:24:18] Trang da tai thanh cong       |
+| [17:24:21] Dang dien username...        |
+| [17:24:22] Tai khoan #1 da tao          |
+|                                          |
++------------------------------------------+
+| Status: San sang                         |
++------------------------------------------+
+
+---
+
+HUONG DAN SU DUNG:
+
+1. Chay chuong trinh
+2. CHON GAME tu dropdown:
+   - default: Example Game
+   - game1: Game 1
+   - game2: Game 2
+3. NHAP SO LUONG tai khoan can tao (1-100)
+4. TUY CHON: Tick "Che do Headless" de an trinh duyet
+5. NHAN "Bat dau dang ky"
+6. THEO DOI log va cho hoan thanh
+
+---
+
+OUTPUT:
+
+Sau khi chay xong:
+├─ accounts.txt        <- Danh sach tai khoan
+└─ logs/               <- Chi tiet log
+
+---
+
+CUSTOM CONFIG:
+
+Chinh sua file: config.py
+
+Vi du them game moi:
+GAME_SERVERS = {
+    'my-game': {
+        'url': 'https://my-game.com/register',
+        'name': 'My Game',
+    }
+}
+
+---
+
+TROUBLESHOOTING:
+
+[ERROR] "GameAccountRegistrar.exe not found"
+-> Chay: WINDOWS_SETUP.bat
+-> (Can Python cai san)
+
+[ERROR] "Element not found"
+-> Tim CSS selector dung & chinh sua form_selectors
+
+[ERROR] Timeout error
+-> Tang explicit_wait trong config.py
+
+[ERROR] Antivirus block file
+-> Them exception trong antivirus
+
+---
+
+TIPS:
+
+• Chay headless nhanh hon 2-3x
+• Delays ngau nhien giup tranh detection
+• Xem logs de debug loi
+
+---
+
+FILE LIEN QUAN:
+
+├─ WINDOWS_SETUP.bat              <- Cai dat cho Windows
+├─ dist/GameAccountRegistrar.exe  <- Windows executable (sau setup)
+├─ dist/run.bat                   <- Windows batch runner
+├─ dist/GameAccountRegistrar      <- Linux/Mac executable
+├─ config.py                      <- Cau hinh
+├─ game_account_registrar.py      <- Core logic
+├─ gui_launcher.py                <- Giao dien GUI
+├─ utils.py                       <- Utilities
+├─ EXE_BUILD_GUIDE.md             <- Huong dan chi tiet
+└─ README.md                      <- Tai lieu goc
+
+---
+
+BAN DA SAN SANG!
+
+Chay file .EXE hoac batch script va bat dau dang ky tai khoan game ngay!

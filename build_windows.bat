@@ -52,7 +52,7 @@ echo This may take 1-2 minutes...
 echo.
 
 REM Use python -m to ensure pyinstaller is found
-python -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher_advanced.py
+python -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
 if %errorlevel% neq 0 (
     echo ERROR: Failed to build executable
     pause

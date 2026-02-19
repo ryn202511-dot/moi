@@ -110,7 +110,7 @@ class AdvancedGUILauncher:
         # Separator
         ttk.Separator(left_panel, orient=tk.HORIZONTAL).grid(row=9, column=0, columnspan=2, sticky='ew', pady=10)
         
-        # Buttons
+       # Buttons 
         button_frame = ttk.Frame(left_panel)
         button_frame.grid(row=10, column=0, columnspan=2, sticky='ew', pady=10)
         
