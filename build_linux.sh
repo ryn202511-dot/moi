@@ -1,60 +1,71 @@
 #!/bin/bash
-# Script để build executable cho Linux/Mac
-# Chạy: chmod +x build_linux.sh && ./build_linux.sh
-
-set -e
+# Build GameAccountRegistrar_Standalone.py to executable on Linux/Mac
+# Make this executable: chmod +x build_linux.sh
 
 echo ""
 echo "================================================"
-echo "   BUILDING GAME ACCOUNT REGISTRAR EXECUTABLE"
+echo "  Game Account Registrar v3.0 - Build"
 echo "================================================"
 echo ""
 
-# Check Python
-if ! command -v python3 &> /dev/null; then
-    echo "ERROR: Python 3 not found! Please install Python 3.8+"
+# Step 1: Check Python version
+echo "[1/5] Checking Python..."
+python3 --version
+if [ $? -ne 0 ]; then
+    echo "ERROR: Python 3 not found. Please install Python 3.8+"
     exit 1
 fi
 
-echo "[1/3] Installing dependencies..."
-echo "Upgrading pip..."
-pip3 install --upgrade pip
-echo "Installing packages..."
-pip3 install --no-cache-dir -r requirements.txt
+# Step 2: Upgrade pip
+echo "[2/5] Upgrading pip..."
+python3 -m pip install --upgrade pip -q
 
-echo "Checking PyInstaller installation..."
-python3 -m pip show pyinstaller > /dev/null 2>&1
+# Step 3: Install dependencies
+echo "[3/5] Installing dependencies..."
+python3 -m pip install -r requirements.txt -q
 if [ $? -ne 0 ]; then
-    echo "ERROR: PyInstaller not installed"
-    echo "Trying to install again..."
-    pip3 install --no-cache-dir pyinstaller==6.19.0
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to install PyInstaller"
-        exit 1
-    fi
-fi
-
-echo ""
-echo "[2/3] Cleaning old build..."
-rm -rf build/ dist/ *.spec
-
-echo ""
-echo "[3/3] Building executable..."
-echo "This may take 1-2 minutes..."
-python3 -m PyInstaller --onefile --windowed --name GameAccountRegistrar gui_launcher_advanced.py
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: Failed to build executable"
+    echo "ERROR: Failed to install dependencies"
     exit 1
 fi
 
+# Step 4: Clean old builds
+echo "[4/5] Cleaning old builds..."
+rm -rf build dist *.spec
+
+# Step 5: Build executable
+echo "[5/5] Building executable (this may take 1-2 minutes)..."
 echo ""
-echo "================================================"
-echo "   BUILD COMPLETED SUCCESSFULLY!"
-echo "================================================"
-echo ""
-echo "Executable location: dist/GameAccountRegistrar"
-echo ""
-echo "To run:"
-echo "  ./dist/GameAccountRegistrar"
-echo ""
+python3 -m PyInstaller \
+    --onefile \
+    --windowed \
+    --name GameAccountRegistrar \
+    --add-data "requirements.txt:." \
+    --hide-import=matplotlib \
+    --collect-all selenium \
+    --collect-all webdriver_manager \
+    --collect-all requests \
+    GameAccountRegistrar_Standalone.py
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "================================================"
+    echo "SUCCESS! Executable built successfully"
+    echo "================================================"
+    echo ""
+    echo "File location: ./dist/GameAccountRegistrar"
+    echo "Size: $(du -h dist/GameAccountRegistrar | cut -f1)"
+    echo ""
+    echo "You can now:"
+    echo "1. Run: ./dist/GameAccountRegistrar"
+    echo "2. Make it executable: chmod +x dist/GameAccountRegistrar"
+    echo "3. Copy to /usr/local/bin/ to use systemwide"
+    echo ""
+else
+    echo ""
+    echo "ERROR: Build failed"
+    echo ""
+    echo "Try running test first:"
+    echo "  python3 GameAccountRegistrar_Standalone.py"
+    echo ""
+    exit 1
+fi

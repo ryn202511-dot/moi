@@ -1,0 +1,139 @@
+======================================================
+  FIX FOR: GameAccountRegistrar.exe NOT FOUND ERROR
+======================================================
+
+PROBLEM:
+--------
+Khi chạy dist\run.bat trên Windows, bạn gặp lỗi:
+  "ERROR: GameAccountRegistrar.exe not found!"
+
+CAUSE (Nguyên nhân):
+--------------------
+- ZIP file được tạo trên Linux chứa executable Linux
+- Executable Linux (dist/GameAccountRegistrar) không chạy được trên Windows
+- Cần build lại file .exe cho Windows
+
+
+SOLUTION 1: WINDOWS_SETUP.bat (FASTEST - TỐI ƯU NHẤT)
+=====================================================
+
+1. Cài Python từ: https://www.python.org
+   - Download Python 3.8 hoặc cao hơn
+   - IMPORTANT: Tick "Add Python to PATH" khi cài
+   - Click "Install Now"
+
+2. Restart Command Prompt (CMD)
+
+3. Double-click file: WINDOWS_SETUP.bat
+   - Sẽ tự động cài dependencies
+   - Build executable Windows (.exe)
+   - Mất 1-2 phút
+
+4. Chạy chương trình:
+   - Double-click: dist\GameAccountRegistrar.exe
+   - Hoặc: dist\run.bat
+
+Done! Chương trình sẽ hoạt động bình thường.
+
+
+SOLUTION 2: MANUAL BUILD (Nếu WINDOWS_SETUP.bat không chạy)
+===========================================================
+
+1. Cài Python (như trên)
+
+2. Mở CMD (Win+R -> cmd -> Enter)
+
+3. Navigate đến thư mục project:
+   cd C:\path\to\GameAccountRegistrar
+
+4. Cài dependencies:
+   pip install -r requirements.txt
+
+5. Build executable:
+   pyinstaller --onefile --windowed --name GameAccountRegistrar gui_launcher.py
+
+6. Chạy chương trình:
+   dist\GameAccountRegistrar.exe
+
+
+SOLUTION 3: RUN WITH PYTHON (Không cần build .exe)
+==================================================
+
+Nếu chỉ muốn chạy mà không build .exe:
+
+1. Cài Python (như trên)
+
+2. Mở CMD trong thư mục
+
+3. Chạy:
+   python gui_launcher.py
+
+4. GUI sẽ hiện ra và chạy bình thường
+
+(Điều này sẽ chậm hơn vì Python script không compile)
+
+
+TROUBLESHOOTING WINDOWS_SETUP.bat:
+==================================
+
+❌ "Python is not installed or not in PATH"
+   → Cài Python lại
+   → Tick "Add Python to PATH"
+   → Restart CMD
+
+❌ "requirements.txt not found"
+   → Run từ thư mục gốc (nơi requirements.txt)
+   → Không run từ subdirectory
+
+❌ "pyinstaller: command not found"
+   → pip install -r requirements.txt
+   → Chờ cài xong
+   → Retry WINDOWS_SETUP.bat
+
+❌ Build fails with errors
+   → Delete folder: build/ dist/
+   → Retry WINDOWS_SETUP.bat
+   → Hoặc dùng SOLUTION 2
+
+
+VERIFY INSTALLATION:
+====================
+
+Sau khi build xong, kiểm tra:
+
+1. File tồn tại: dist\GameAccountRegistrar.exe
+2. Size phải > 40MB
+3. Double-click để chạy
+
+Nếu .exe không chạy:
+- Thêm exception trong antivirus
+- Hoặc dùng Solution 3 (run with Python)
+
+
+QUICK REFERENCE:
+================
+
+Windows User:
+1. Unzip file
+2. Double-click WINDOWS_SETUP.bat
+3. Wait 1-2 minutes
+4. Run dist\GameAccountRegistrar.exe
+
+That's it! ✓
+
+
+SUPPORT:
+========
+
+Nếu vẫn có vấn đề:
+1. Kiểm tra Python đã cài: python --version
+2. Kiểm tra pip hoạt động: pip --version
+3. Xem log từ WINDOWS_SETUP.bat (scroll lên trên)
+4. Thử SOLUTION 2 (manual build)
+
+
+===================================================
+
+Tóm tắt: Chạy WINDOWS_SETUP.bat -> Build .exe -> Chạy .exe
+
+Good luck! 🚀

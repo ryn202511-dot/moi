@@ -1,53 +1,91 @@
 @echo off
 REM Build GameAccountRegistrar_Standalone.py to .EXE
+REM Complete build script for Windows with error handling
 
-echo ======================================================
-echo  Game Account Registrar v2.1-OTP - Building EXE...
-echo ======================================================
+echo.
+echo ================================================
+echo  Game Account Registrar v3.0 - Build to EXE
+echo ================================================
 echo.
 
-REM Check if dependencies are installed
-echo [1/3] Checking dependencies...
-python -m pip show pyinstaller >nul 2>&1
+setlocal enabledelayedexpansion
+
+REM Step 1: Upgrade pip
+echo [1/5] Upgrading pip...
+python -m pip install --upgrade pip -q
+
+REM Step 2: Install dependencies from requirements.txt
+echo [2/5] Installing dependencies...
+python -m pip install -r requirements.txt -q
 if %errorlevel% neq 0 (
-    echo Installing PyInstaller...
-    python -m pip install pyinstaller -q
+    echo ERROR: Failed to install dependencies
+    pause
+    exit /b 1
 )
 
-python -m pip show selenium >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Installing Selenium...
-    python -m pip install selenium webdriver-manager requests -q
-)
+REM Step 3: Clean old builds
+echo [3/5] Cleaning old builds...
+if exist build rmdir /s /q build >nul 2>&1
+if exist dist rmdir /s /q dist >nul 2>&1
+del /q *.spec >nul 2>&1
 
-echo Done!
+REM Step 4: Build EXE
+echo [4/5] Building executable (this may take 1-2 minutes)...
 echo.
-
-REM Build EXE
-echo [2/3] Building EXE (this may take a few minutes)...
 python -m PyInstaller ^
     --onefile ^
     --windowed ^
     --name GameAccountRegistrar ^
-    --icon=icon.ico ^
-    GameAccountRegistrar_Standalone.py 2>nul
+    --add-data "requirements.txt:." ^
+    --hide-import=matplotlib ^
+    --collect-all selenium ^
+    --collect-all webdriver_manager ^
+    --collect-all requests ^
+    GameAccountRegistrar_Standalone.py
 
-if %errorlevel% equ 0 (
-    echo Done!
+if %errorlevel% neq 0 (
     echo.
-    echo [3/3] Cleaning up...
-    rmdir /s /q build >nul 2>&1
-    del /q GameAccountRegistrar.spec >nul 2>&1
-    echo Done!
+    echo ERROR: PyInstaller build failed
     echo.
-    echo ======================================================
-    echo Success! 
-    echo EXE file location: dist\GameAccountRegistrar.exe
-    echo ======================================================
+    echo Possible causes:
+    echo - Python version incompatibility
+    echo - Missing dependencies
+    echo - File path issues
+    echo.
+    echo Try running:
+    echo   python GameAccountRegistrar_Standalone.py
     echo.
     pause
-    explorer dist
-) else (
-    echo ERROR: Build failed!
-    pause
+    exit /b 1
 )
+
+REM Step 5: Verify and cleanup
+echo [5/5] Finalizing...
+if exist dist\GameAccountRegistrar.exe (
+    echo.
+    echo ================================================
+    echo SUCCESS! Executable built successfully
+    echo ================================================
+    echo.
+    echo File location: dist\GameAccountRegistrar.exe
+    echo Size: 
+    for %%F in (dist\GameAccountRegistrar.exe) do echo %%~sF bytes
+    echo.
+    echo You can now:
+    echo 1. Move GameAccountRegistrar.exe to desktop
+    echo 2. Run it directly - no Python needed!
+    echo.
+    
+    REM Optional: Open dist folder
+    echo Opening dist folder...
+    start "" dist
+    
+    echo.
+    pause
+) else (
+    echo ERROR: EXE file not found after build
+    pause
+    exit /b 1
+)
+
+endlocal
