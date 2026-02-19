@@ -1,0 +1,122 @@
+🎮 GAME ACCOUNT REGISTRAR - QUICK START GUIDE
+==============================================
+
+✅ FILE .EXE ĐÃ ĐƯỢC TẠO THÀNH CÔNG!
+
+📍 VỊ TRÍ: /dist/GameAccountRegistrar (45MB)
+
+---
+
+⚡ CÁCH CHẠY CÓ NGAY:
+
+1️⃣ WINDOWS:
+   ├─ Cách 1: Chạy file batch
+   │  └─ Double-click vào: dist/run.bat
+   │
+   └─ Cách 2: Chạy trực tiếp
+      └─ Double-click vào: dist/GameAccountRegistrar.exe
+
+2️⃣ LINUX/MAC:
+   └─ Terminal: ./dist/GameAccountRegistrar
+
+---
+
+🎯 GIAO DIỆN CHƯƠNG TRÌNH:
+
+┌─────────────────────────────────────────┐
+│  Game Account Registrar Tool            │
+│  Công cụ tự động đăng ký tài khoản game │
+├─────────────────────────────────────────┤
+│  [Chọn Game:] [Game1 ▼]                │
+│  [Số lượng:]  [10]                      │
+│  ☑ Chế độ Headless                      │
+├─────────────────────────────────────────┤
+│  [▶ Bắt đầu]  [⏹ Dừng]  [🗑 Xóa log]   │
+├─────────────────────────────────────────┤
+│  ═══════════ LOG ═══════════            │
+│  [17:24:15] Khởi tạo Chrome WebDriver..│
+│  [17:24:18] Trang đã tải thành công    │
+│  [17:24:21] Đang điền username...      │
+│  [17:24:22] ✓ Tài khoản #1 được tạo   │
+│                                         │
+├─────────────────────────────────────────┤
+│  Status: Sẵn sàng                       │
+└─────────────────────────────────────────┘
+
+---
+
+📝 HƯỚNG DẪN SỬ DỤNG:
+
+1. Chạy chương trình
+2. CHỌN GAME từ dropdown:
+   - default: Example Game
+   - game1: Game 1
+   - game2: Game 2
+3. NHẬP SỐ LƯỢNG tài khoản cần tạo (1-100)
+4. TÙY CHỌN: Tick "Chế độ Headless" để ẩn trình duyệt
+5. NHẤN "▶ Bắt đầu đăng ký"
+6. THEO DÕI log và chờ hoàn thành
+
+---
+
+📊 OUTPUT:
+
+Sau khi chạy xong:
+├─ accounts.txt        ← Danh sách tài khoản
+└─ logs/               ← Chi tiết log
+
+---
+
+⚙️ CUSTOM CONFIG:
+
+Chỉnh sửa file: config.py
+
+Ví dụ thêm game mới:
+```python
+GAME_SERVERS = {
+    'my-game': {
+        'url': 'https://my-game.com/register',
+        'name': 'My Game',
+    }
+}
+```
+
+---
+
+🛠 TROUBLESHOOTING:
+
+❌ "Element not found"
+   → Tìm CSS selector đúng & chỉnh sửa form_selectors
+
+❌ Timeout error
+   → Tăng explicit_wait trong config.py
+
+❌ Antivirus block file
+   → Thêm exception trong antivirus
+
+---
+
+⚡ TIP:
+
+• Chạy headless nhanh hơn 2-3x
+• Delays ngẫu nhiên giữp tránh detection
+• Xem logs để debug lỗi
+
+---
+
+📄 FILE LIÊN QUAN:
+
+├─ dist/GameAccountRegistrar.exe  ← FILE CHÍNH (.EXE)
+├─ dist/run.bat                   ← Windows batch runner
+├─ config.py                      ← Cấu hình
+├─ game_account_registrar.py      ← Core logic
+├─ gui_launcher.py                ← Giao diện GUI
+├─ utils.py                       ← Utilities
+├─ EXE_BUILD_GUIDE.md             ← Hướng dẫn chi tiết
+└─ README.md                      ← Tài liệu gốc
+
+---
+
+✨ BẠN ĐÃ SẴN SÀNG!
+
+Chạy file .EXE và bắt đầu đăng ký tài khoản game ngay! 🚀
