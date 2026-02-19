@@ -1,0 +1,9 @@
+"""
+Sample sdt.txt - Phone numbers for OTP
+One phone number per line
+"""
+0912345678
+0923456789
+0934567890
+0945678901
+0956789012
